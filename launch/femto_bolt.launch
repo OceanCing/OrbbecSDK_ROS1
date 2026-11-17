@@ -18,6 +18,9 @@
     <arg name="enable_frame_drop_log" default="false"/>
     <arg name="frame_timestamp_csv_file" default=""/>
     <arg name="uvc_backend" default="libuvc"/><!-- "libuvc" or "v4l2" -->
+    <!-- Select CPU EGL before the SDK is loaded; not a live ROS parameter. -->
+    <arg name="use_cpu_mesa" default="false"/>
+    <arg name="cpu_mesa_prefix" default="$(optenv ORBBEC_MESA_PREFIX /opt/orbbec-mesa-cpu/25.2.8)"/>
     <!-- For more information, refer to https://www.orbbec.com/docs/g330-use-depth-presets/-->
     <arg name="device_preset" default="Custom"/>
     <arg name="diagnostics_frequency" default="1.0"/>
@@ -123,7 +126,9 @@
     <arg name="enable_hardware_reset" default="false"/>
 
     <group ns="$(arg camera_name)">
-        <node name="camera" pkg="orbbec_camera" type="orbbec_camera_node" output="screen">
+        <node name="camera" pkg="orbbec_camera" type="orbbec_camera_node" output="screen"
+              launch-prefix="$(eval find('orbbec_camera') + '/scripts/with_cpu_mesa.sh' if arg('use_cpu_mesa') else '')">
+            <env name="ORBBEC_MESA_PREFIX" value="$(arg cpu_mesa_prefix)"/>
             <!-- Use the parameters defined above -->
             <param name="camera_name" value="$(arg camera_name)"/>
             <param name="bag_record_filename" value="$(arg bag_record_filename)"/>
